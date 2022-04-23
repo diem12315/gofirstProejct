@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -46,6 +47,8 @@ func (srv *Server) Handler(conn net.Conn) {
 	teluser := NewUser(conn, srv)
 	teluser.Online()
 
+	isonline := make(chan bool)
+
 	go func() {
 		buf := make([]byte, 4096)
 		for {
@@ -62,10 +65,25 @@ func (srv *Server) Handler(conn net.Conn) {
 			msg := string(buf[:n-1])
 
 			teluser.DoMessage(msg)
+
+			isonline <- true
 		}
 	}()
 	fmt.Println("Now UserNumber: ", len(srv.OnlineMap))
-	select {}
+	for {
+		select {
+		case <-isonline:
+
+		case <-time.After((time.Second * 50)):
+			teluser.SendMsg("You were forced off the line")
+
+			close(teluser.UserChan)
+
+			conn.Close()
+
+			return
+		}
+	}
 }
 
 func (srv *Server) Start() {

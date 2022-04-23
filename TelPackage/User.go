@@ -70,6 +70,25 @@ func (usr *TestUser) DoMessage(msg string) {
 			usr.Name = newName
 			usr.SendMsg("你已经更新用户名" + usr.Name + "\n")
 		}
+	} else if len(msg) > 4 && msg[:3] == "to|" {
+		remoteName := strings.Split(msg, "|")[1]
+		if remoteName == "" {
+			usr.SendMsg("消息格式不正确，请使用 \"to|张三|你好啊\"格式。 \n")
+			return
+		}
+		remoteUser, ok := usr.server.OnlineMap[remoteName]
+		if !ok {
+			usr.SendMsg("该用户不存在\n")
+			return
+		}
+
+		content := strings.Split(msg, "|")[2]
+		if content == " " {
+			usr.SendMsg("无消息内容，请重发\n")
+			return
+		}
+		remoteUser.SendMsg(usr.Name + "对你说：" + content + "\n")
+
 	} else {
 		usr.server.BroadCast(usr, msg)
 	}
