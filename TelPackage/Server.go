@@ -43,7 +43,6 @@ func (srv *Server) BroadCast(user *TestUser, msg string) {
 }
 
 func (srv *Server) Handler(conn net.Conn) {
-	fmt.Println("Listening success")
 	teluser := NewUser(conn, srv)
 	teluser.Online()
 
@@ -62,10 +61,10 @@ func (srv *Server) Handler(conn net.Conn) {
 
 			msg := string(buf[:n-1])
 
-			srv.BroadCast(teluser, msg)
+			teluser.DoMessage(msg)
 		}
 	}()
-
+	fmt.Println("Now UserNumber: ", len(srv.OnlineMap))
 	select {}
 }
 
