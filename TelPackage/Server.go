@@ -74,7 +74,7 @@ func (srv *Server) Handler(conn net.Conn) {
 		select {
 		case <-isonline:
 
-		case <-time.After((time.Second * 50)):
+		case <-time.After((time.Second * 150)):
 			teluser.SendMsg("You were forced off the line")
 
 			close(teluser.UserChan)
